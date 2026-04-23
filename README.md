@@ -1,494 +1,251 @@
-# 🎯 Job Hunter - Guia de Setup
+# Job Hunter
 
-## 🚀 Início Rápido (Uma linha!)
-
-```bash
-python3 setup.py
-```
-
-Isso vai:
-
-- ✅ Detectar seu SO (Linux, macOS, Windows)
-- ✅ Instalar todas as dependências automaticamente
-- ✅ Configurar variáveis de ambiente (.env)
-- ✅ Criar virtual environment Python
-- ✅ Instalar dependências Python (pip)
-- ✅ Subir Docker Compose
-- ✅ Executar o projeto
+Busca vagas automaticamente em múltiplas plataformas com base no seu currículo PDF, avalia compatibilidade via IA (Groq) e apresenta os resultados num painel interativo de revisão.
 
 ---
 
-## 📋 Opções de Menu
+## Pré-requisitos
 
-Ao executar `python3 setup.py`, você terá 4 opções:
+| Requisito | Versão mínima | Como obter |
+|---|---|---|
+| Python | 3.10+ | https://python.org/downloads |
+| Docker Desktop | qualquer | https://docker.com/products/docker-desktop |
+| Conta Groq | — | https://console.groq.com |
 
-### **1️⃣ Setup Completo**
-
-Instala TUDO e executa o projeto de uma vez:
-
-```bash
-python3 setup.py
-> Escolha (1-4): 1
-```
-
-### **2️⃣ Apenas Instalar**
-
-Instala dependências sem executar:
-
-```bash
-python3 setup.py
-> Escolha (1-4): 2
-```
-
-Use isso quando tiver atualizado `requirements.txt`
-
-### **3️⃣ Apenas Executar**
-
-Executa o projeto (dependências já instaladas):
-
-```bash
-python3 setup.py
-> Escolha (1-4): 3
-```
-
-### **4️⃣ Apenas Docker**
-
-Sobe o Docker Compose:
-
-```bash
-python3 setup.py
-> Escolha (1-4): 4
-```
+> **Windows:** instale Python e Docker Desktop manualmente antes de continuar.
 
 ---
 
-## 🔧 Pré-requisitos (Automático!)
+## Instalação
 
-O script detecta e instala automaticamente:
-
-### **macOS**
+### 1. Clone o repositório
 
 ```bash
-# Se não tiver Homebrew:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# O resto é automático:
-# - Docker Desktop (via Homebrew)
-# - Python 3 (via Homebrew)
+git clone <url-do-repositorio>
+cd "Job Hunter"
 ```
 
-### **Linux (Ubuntu/Debian)**
+### 2. Execute o setup automático
 
 ```bash
-# Instalar sudo se necessário (geralmente já vem)
-# O rest é automático:
-# - Docker & Docker Compose
-# - Python 3 & pip
-# - Todas as dependências do sistema
+python3 setup.py
 ```
 
-### **Linux (Fedora/CentOS/RHEL)**
+O script detecta seu sistema operacional e faz tudo automaticamente:
 
-Mesmo que Ubuntu, mas com `dnf` ao invés de `apt-get`
+- Cria o virtual environment Python (`venv/`)
+- Instala as dependências do `requirements.txt`
+- Cria o arquivo `.env` a partir do `.env.example`
+- Sobe o MongoDB via Docker Compose
+- Valida a conexão com o banco
 
-### **Linux (Arch)**
+> Em Linux, pode ser necessário adicionar seu usuário ao grupo docker antes:
+> ```bash
+> sudo usermod -aG docker $USER && newgrp docker
+> ```
 
-Mesmo que Ubuntu, mas com `pacman` ao invés de `apt-get`
-
-### **Windows**
-
-Você terá que instalar manualmente:
-
-1. [Docker Desktop](https://www.docker.com/products/docker-desktop)
-2. [Python 3](https://www.python.org/downloads/)
-
-Depois execute `python3 setup.py` novamente
-
----
-
-## 📝 Variáveis de Ambiente
-
-O script cria `.env` automaticamente com:
-
-```env
-GROQ_API_KEY=sk_live_  # ← Preencha com sua chave!
-RESUME_PATH=/Documents/...
-```
-
-### Obter GROQ_API_KEY:
+### 3. Obtenha uma chave de API do Groq
 
 1. Acesse https://console.groq.com
-2. Crie uma conta ou faça login
-3. Gere uma nova API Key
-4. Cole no setup quando solicitar
+2. Crie uma conta e gere uma API Key
+3. A chave será solicitada na primeira execução, ou adicione manualmente ao `.env`:
+
+```env
+GROQ_API_KEY=gsk_...
+```
 
 ---
 
-## 🐳 Docker Compose
+## Execução
 
-O script automáticamente:
-
-- ✅ Valida instalação do Docker
-- ✅ Sobe containers (`docker-compose up -d`)
-- ✅ Aguarda MongoDB estar pronto
-- ✅ Valida conexão com banco
+### Forma padrão
 
 ```bash
-# Verificar status:
+python3 run.py --resume caminho/para/curriculo.pdf
+```
+
+### Modo verbose (logs detalhados)
+
+```bash
+python3 run.py --resume caminho/curriculo.pdf -v
+```
+
+### Atalhos por SO
+
+| Sistema | Comando |
+|---|---|
+| Linux / macOS | `./run.sh --resume curriculo.pdf` |
+| Windows | `run.bat --resume curriculo.pdf` |
+| Qualquer SO | `python3 run.py --resume curriculo.pdf` |
+
+> **Dica:** o caminho do currículo pode ser salvo nas configurações do app — depois da primeira execução, você pode configurar `RESUME_PATH` no `.env` ou via menu de configurações.
+
+---
+
+## Variáveis de ambiente (`.env`)
+
+Copie `.env.example` para `.env` e preencha:
+
+```env
+# Obrigatório
+GROQ_API_KEY=gsk_...
+
+# Opcional — caminho padrão do currículo
+RESUME_PATH=/caminho/curriculo.pdf
+
+# Opcional — MongoDB (padrão: localhost:27017)
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DB=job_hunter
+
+# Opcional — LinkedIn Feed (cookie de autenticação)
+LINKEDIN_LI_AT=
+```
+
+---
+
+## Plataformas de busca disponíveis
+
+| Grupo | Plataformas |
+|---|---|
+| Brasil — Geral | Indeed BR, InfoJobs, Catho, Gupy, Vagas.com.br |
+| Brasil — Tech | ProgramaThor, GeekHunter, Revelo, Impulso, Remotar |
+| Freelance | Upwork, Workana, 99Freelas |
+| Internacional | Indeed USA, Glassdoor, ZipRecruiter, Careerjet BR, Jora, RemoteOK, Himalayas, We Work Remotely, Turing, Toptal |
+| LinkedIn | LinkedIn Brasil *(filtra por geoId BR)*, LinkedIn Global, LinkedIn Jobs, LinkedIn Feed* |
+
+> *LinkedIn Feed requer `LINKEDIN_LI_AT` configurado (cookie de sessão).
+
+---
+
+## Fluxo de uma busca
+
+```
+1. Menu principal → Nova busca
+2. Preferências   → localização, modalidade, contrato, inglês, recência
+3. Fontes         → seleciona plataformas
+4. Stack / Área   → ex: Frontend, Backend, Mobile...
+5. Tecnologias    → ex: React, TypeScript, Node.js...
+6. Query          → IA gera sugestão; edite ou confirme
+7. Scraping       → coleta vagas nas plataformas selecionadas
+8. Avaliação      → IA analisa compatibilidade currículo × vaga
+9. Revisão        → navegue pelos cards e decida cada vaga
+```
+
+### Atalhos na revisão de vagas
+
+| Tecla | Ação |
+|---|---|
+| `A` | Aceitar (tenho interesse) |
+| `R` | Recusar (não aparece mais em buscas futuras) |
+| `C` | Já me candidatei |
+| `P` | Fila de candidatura automática |
+| `O` | Abrir vaga no navegador |
+| `V` | Expandir / recolher descrição completa |
+| `N` / `→` | Próxima vaga |
+| `B` / `←` | Vaga anterior |
+| `L` | Listar todas as vagas e pular para qualquer uma |
+| `Q` | Encerrar revisão |
+
+> A navegação é em carrossel: na última vaga, `N` volta para a primeira.
+
+---
+
+## Presets
+
+Cada busca é salva automaticamente como preset. No menu principal você pode:
+
+- **Usar preset** — repete uma busca anterior com um clique
+- **Editar preset** — ajusta qualquer campo antes de usar
+- **Excluir preset** — remove buscas antigas
+
+---
+
+## Resetar dados
+
+```bash
+# Apaga vagas, fila, histórico e decisões (preserva API key e presets)
+./reset.sh
+
+# Apaga tudo, inclusive .env e presets
+./reset.sh --tudo
+```
+
+---
+
+## Gerenciamento do banco (Docker)
+
+```bash
+# Iniciar MongoDB
+docker-compose up -d
+
+# Verificar status
 docker-compose ps
 
-# Ver logs:
-docker-compose logs -f
+# Ver logs
+docker-compose logs -f mongodb
 
-# Parar:
+# Parar
 docker-compose down
 ```
 
 ---
 
-## 🐍 Python Virtual Environment
-
-Criado em `venv/`:
-
-```bash
-# Ativar manualmente (se preciso):
-# Linux/macOS:
-source venv/bin/activate
-
-# Windows:
-venv\Scripts\activate
-```
-
----
-
-## 🎮 Executar Manualmente
-
-Se preferir rodar sem o script:
-
-```bash
-# 1. Ativar venv
-source venv/bin/activate  # ou venv\Scripts\activate no Windows
-
-# 2. Subir Docker
-docker-compose up -d
-
-# 3. Aguardar MongoDB
-sleep 5
-
-# 4. Executar
-python job_hunter.py --resume seu_curriculo.pdf
-```
-
----
-
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Docker não inicia
 
 ```bash
-# Verifique se Docker daemon está rodando:
+# macOS: abra o Docker.app
+# Linux:
+sudo systemctl start docker
+
+# Verifique:
 docker ps
-
-# Se não funcionar, inicie Docker:
-# macOS: Abra Docker.app
-# Linux: sudo systemctl start docker
-# Windows: Abra Docker Desktop
 ```
 
-### Módulo Python não encontrado
+### MongoDB sem conexão
 
 ```bash
-# Reinstale dependências:
-python3 setup.py
-> Escolha (1-4): 2
-```
-
-### MongoDB não conecta
-
-```bash
-# Verifique logs do container:
-docker-compose logs mongodb
-
-# Reinicie:
 docker-compose down
 docker-compose up -d
+docker-compose logs mongodb
 ```
 
-### Permissão negada (Linux)
+### Dependências Python faltando
 
 ```bash
-# Adicione seu usuário ao grupo docker:
-sudo usermod -aG docker $USER
-newgrp docker
+python3 setup.py   # reinstala tudo
+```
 
-# Reinicie o terminal
+### Permissão negada em run.sh
+
+```bash
+chmod +x run.sh reset.sh
+```
+
+### Reinstalar do zero
+
+```bash
+rm -rf venv .env
+python3 setup.py
 ```
 
 ---
 
-## 📊 Estrutura após setup
+## Estrutura do projeto
 
 ```
 Job Hunter/
-├── venv/                    # Virtual environment
-├── .env                     # Variáveis (criado automaticamente)
-├── .env.example             # Template
-├── job_hunter.py            # Código principal
-├── requirements.txt         # Dependências Python
-├── docker-compose.yml       # Config Docker
-├── setup.py                 # Este script
-└── SETUP.md                 # Este arquivo
+├── job_hunter.py        # Aplicação principal
+├── run.py               # Wrapper de execução (cross-platform)
+├── run.sh               # Atalho Linux/macOS
+├── run.bat              # Atalho Windows
+├── setup.py             # Setup automático
+├── reset.sh             # Reset de dados / configuração
+├── docker-compose.yml   # MongoDB via Docker
+├── requirements.txt     # Dependências Python
+├── .env.example         # Template de variáveis
+├── .env                 # Suas variáveis (gerado no setup)
+└── venv/                # Virtual environment (gerado no setup)
 ```
-
----
-
-## 🚨 Notas Importantes
-
-1. **GROQ_API_KEY é obrigatória** para usar IA
-2. **Docker precisa estar rodando** para usar MongoDB
-3. **Python 3.8+** é necessário
-4. **Conexão com internet** para baixar dependências primeira vez
-
----
-
-## 📞 Suporte
-
-Se encontrar problemas:
-
-1. Verifique os logs:
-
-   ```bash
-   docker-compose logs
-   ```
-
-2. Teste componentes individualmente:
-
-   ```bash
-   python3 --version
-   docker --version
-   docker-compose --version
-   ```
-
-3. Reinstale do zero:
-   ```bash
-   rm -rf venv .env
-   python3 setup.py
-   ```
-
----
-
-Pronto! 🚀 Agora é só `python3 setup.py` e está tudo funcionando!
-
-# 🚀 Job Hunter - Como Executar
-
-## ⚡ Forma Mais Rápida
-
-### **Linux/macOS:**
-
-```bash
-./run.sh
-```
-
-### **Windows:**
-
-```bash
-run.bat
-```
-
-### **Qualquer SO:**
-
-```bash
-python3 run.py
-```
-
----
-
-## 📋 Primeira Execução (Setup Automático)
-
-Na primeira vez, o programa verifica o que falta:
-
-```bash
-$ ./run.sh
-
-┌──────────────────────────────────────────────┐
-│ 📋  Verificação de Requisitos                │
-└──────────────────────────────────────────────┘
-
-  ✓ Docker
-  ✗ MongoDB rodando
-  ✓ .env configurado
-  ✓ GROQ_API_KEY
-  ✓ Python venv
-  ✓ Dependências Python
-
-  Alguns requisitos estão faltando.
-
-  O que deseja fazer?
-
-  1. Instalar/configurar o que falta automaticamente
-  2. Executar mesmo assim (com funcionalidades limitadas)
-  3. Sair
-
-  Escolha (1-3): 1
-```
-
-Escolha **1** e tudo será instalado automaticamente!
-
----
-
-## ✅ Execuções Posteriores (Automático!)
-
-```bash
-$ ./run.sh
-
-┌──────────────────────────────────────────────┐
-│ 📋  Verificação de Requisitos                │
-└──────────────────────────────────────────────┘
-
-  ✓ Docker
-  ✓ MongoDB rodando
-  ✓ .env configurado
-  ✓ GROQ_API_KEY
-  ✓ Python venv
-  ✓ Dependências Python
-
-  ✓ Tudo pronto! Executando projeto...
-
-  Qual currículo deseja usar?
-
-  1. curriculo.pdf ← usado por último
-  2. cv_english.pdf
-  3. Outro arquivo
-
-  Escolha (1-3): 1
-
-→ Executa com curriculo.pdf
-```
-
-Pronto! **Sem mais setup, sem argumentos, tudo automático!**
-
----
-
-## 🎯 Opções de Execução
-
-### **Executar com currículo diferente:**
-
-```bash
-./run.sh --resume outro_curriculo.pdf
-```
-
-### **Executar com query customizada:**
-
-```bash
-./run.sh --query "React Developer" --location "São Paulo"
-```
-
-### **Ver todas as opções:**
-
-```bash
-./run.sh --help
-```
-
----
-
-## 🔧 Métodos Alternativos
-
-### **1️⃣ Via Python direto:**
-
-```bash
-python3 job_hunter.py
-```
-
-### **2️⃣ Via wrapper Python (funciona em qualquer SO):**
-
-```bash
-python3 run.py
-```
-
-### **3️⃣ Via shell script (Linux/macOS):**
-
-```bash
-./run.sh
-```
-
-### **4️⃣ Via batch script (Windows):**
-
-```bash
-run.bat
-```
-
----
-
-## 📱 Inicialização Automática
-
-Se quer executar sem interação (vai pedir só o currículo na primeira vez):
-
-```bash
-# Aceita tudo com defaults
-./run.sh
-
-# Ou com currículo já definido
-./run.sh --resume curriculo.pdf
-```
-
----
-
-## 🆘 Troubleshooting
-
-### **"python not found"**
-
-```bash
-# Use python3 explicitamente:
-python3 job_hunter.py
-
-# Ou use o wrapper:
-python3 run.py
-```
-
-### **"permission denied" no run.sh**
-
-```bash
-# Torne executável:
-chmod +x run.sh
-
-# Depois execute:
-./run.sh
-```
-
-### **Docker não inicia**
-
-```bash
-# Inicie manualmente:
-docker-compose up -d
-
-# Depois execute:
-./run.sh
-```
-
----
-
-## 💾 Configuração Persistente
-
-O programa salva automaticamente:
-
-- ✅ Último currículo usado
-- ✅ Modelo de IA preferido
-- ✅ Preferências de busca
-
-Na próxima execução, usa os mesmos valores!
-
----
-
-## 🎓 Resumo
-
-| Situação                     | Comando                         |
-| ---------------------------- | ------------------------------- |
-| **Primeira vez**             | `./run.sh` → escolhe opção 1    |
-| **Próximas vezes**           | `./run.sh` → automático!        |
-| **Trocar currículo**         | `./run.sh` → escolhe outro      |
-| **Com currículo específico** | `./run.sh --resume arquivo.pdf` |
-| **Windows**                  | `run.bat` (mesmo fluxo)         |
-
----
-
-**Pronto! Agora é realmente só executar e pronto!** 🚀
